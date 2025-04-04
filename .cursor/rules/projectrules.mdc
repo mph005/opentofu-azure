@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: Development standards for OpenTofu Azure infrastructure projects, covering best practices, security, and architecture guidelines
+globs: **/*.tf, **/*.hcl, *.md, **/*.yaml, **/*.yml
 alwaysApply: true
 ---
 # Cursor Development Rules & AI Collaboration Guide
