@@ -12,7 +12,7 @@ terraform {
     # resource_group_name  = "tfstate"
     # storage_account_name = "tfstate12345"
     # container_name       = "tfstate"
-    # key                  = "terraform.tfstate"
+    # key                  = "tofu.tfstate"
   }
 }
 
@@ -56,6 +56,6 @@ variable "tags" {
 #     resource_group_name  = "tfstate"
 #     storage_account_name = "tfstate12345"
 #     container_name       = "tfstate"
-#     key                  = "network.tfstate"
+#     key                  = "network.tofu.tfstate"
 #   }
 # } 

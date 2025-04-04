@@ -5,13 +5,15 @@ This directory contains Terratest tests for our OpenTofu/Azure infrastructure co
 ## Prerequisites
 
 1. **Go 1.20 or later**
-2. **OpenTofu or Terraform CLI**
+2. **OpenTofu CLI**
 3. **Terragrunt CLI**
 4. **Azure CLI** (authenticated with appropriate permissions)
 
 ## Test Setup
 
 The tests are written using [Terratest](https://terratest.gruntwork.io/), a Go library that makes it easier to test infrastructure code. The tests use actual Azure resources, so make sure you're running the tests using an Azure account with appropriate permissions and resources.
+
+> **Note:** Terratest uses a package called `terraform` in its Go code, which we use despite our project using OpenTofu. The library works seamlessly with OpenTofu when the appropriate binary is specified. Parameter names like `TerraformDir` and `TerraformBinary` are part of the Terratest API and cannot be changed, but we set `TerraformBinary: "terragrunt"` to use OpenTofu through our Terragrunt configuration.
 
 ## Running Tests
 
@@ -67,7 +69,7 @@ The tests follow this pattern:
 
 ## Best Practices
 
-1. **Always clean up resources**: Use `defer terraform.Destroy()` to ensure resources are cleaned up even if tests fail.
+1. **Always clean up resources**: Use `defer terraform.Destroy()` to ensure resources are cleaned up even if tests fail. (Note that the function name includes "terraform" due to Terratest's API, but it works with OpenTofu when the binary is set to "terragrunt")
 2. **Use random names**: Generate random, unique names for all resources to prevent naming conflicts when running tests in parallel.
 3. **Run tests in parallel**: Use `t.Parallel()` to run tests in parallel, but be aware of Azure limits and quotas.
 4. **Test actual behavior**: Verify that resources are created correctly by checking their properties in Azure.
@@ -88,4 +90,4 @@ To add tests for a new module:
 2. Import the required testing packages
 3. Define a test function that creates the necessary resources
 4. Validate that the resources were created correctly
-5. Ensure all resources are cleaned up when the test is finished 
+5. Ensure all resources are cleaned up when the test is finished

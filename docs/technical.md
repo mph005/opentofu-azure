@@ -2,22 +2,24 @@
 
 This document outlines the technical specifications, coding standards, and established patterns for our Azure infrastructure project.
 
+> **Note on HCL Syntax**: For compatibility with existing tools, linters, and syntax highlighters, we use `terraform` as the block name in many `.tf` files, while using `tofu` in newer contexts like Terragrunt-generated content. OpenTofu understands both naming conventions.
+
 ## Technology Stack
 
 | Component | Technology | Version |
 |-----------|------------|---------|
-| IaC Tool | OpenTofu (Terraform) | >= 1.0 |
+| IaC Tool | OpenTofu | >= 1.0 |
 | Provider | Azure RM | ~> 3.0 |
 | Authentication | Azure CLI / Service Principal | Latest |
 | State Backend | Azure Storage | Latest |
 | Configuration Management | Terragrunt | >= 0.45.0 |
 | Testing Framework | Terratest | >= 0.43.0 |
 | Version Control | Git | Latest |
-| CI/CD | [Your CI/CD tool] | Latest |
+| CI/CD | GitHub Actions / Azure DevOps Pipelines | Latest |
 
 ## Coding Standards
 
-### OpenTofu/Terraform Standards
+### OpenTofu Standards
 
 1. **File Organization**
    - `main.tf` - Primary resource definitions
@@ -124,7 +126,7 @@ generate "provider" {
   path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
-terraform {
+tofu {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -147,7 +149,7 @@ remote_state {
     resource_group_name  = "tfstate"
     storage_account_name = "tfstate12345"
     container_name       = "tfstate"
-    key                  = "${local.env}/${path_relative_to_include()}/terraform.tfstate"
+    key                  = "${local.env}/${path_relative_to_include()}/tofu.tfstate"
   }
 }
 ```
@@ -176,7 +178,7 @@ include {
 }
 
 # Reference the module
-terraform {
+tofu {
   source = "../../../modules/resource_group"
 }
 
@@ -195,7 +197,7 @@ include {
   path = find_in_parent_folders()
 }
 
-terraform {
+tofu {
   source = "../../../modules/networking"
 }
 
@@ -208,6 +210,62 @@ inputs = {
   name                = "vnet-dev"
   resource_group_name = dependency.resource_group.outputs.name
   # ...
+}
+```
+
+### Advanced Terragrunt Features
+
+#### Locals and Helper Functions
+
+```hcl
+# Root terragrunt.hcl
+locals {
+  # Parse the filepath to extract environment
+  path_components = split("/", path_relative_to_include())
+  env             = path_components[0]
+  
+  # Load env-specific variables
+  env_vars        = read_terragrunt_config(find_in_parent_folders("env.hcl"))
+  
+  # Common tags for all resources
+  common_tags     = {
+    Environment   = local.env
+    ManagedBy     = "Terragrunt"
+    Project       = "AzureInfra"
+  }
+}
+
+# Pass common variables to all child configurations
+inputs = {
+  tags            = local.common_tags
+  environment     = local.env
+  location        = local.env_vars.locals.location
+}
+```
+
+#### Generate Blocks for Consistent Configuration
+
+```hcl
+# Generate version constraints
+generate "versions" {
+  path      = "versions.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<EOF
+tofu {
+  required_version = ">= 1.0"
+}
+EOF
+}
+
+# Generate backend configuration
+generate "backend" {
+  path      = "backend.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<EOF
+tofu {
+  backend "azurerm" {}
+}
+EOF
 }
 ```
 
@@ -226,6 +284,8 @@ test/
 ├── storage_test.go
 └── README.md
 ```
+
+> **Note:** Terratest uses a package called `terraform` for its Go functions, which we use despite our project using OpenTofu. This is because Terratest was created before the OpenTofu fork, but it works seamlessly with both OpenTofu and Terraform when the appropriate binary is specified. The parameter names like `TerraformDir` and `TerraformBinary` are part of the Terratest API and cannot be changed, but we specify "terragrunt" as the binary to use OpenTofu through Terragrunt.
 
 ### Test Implementation
 
@@ -271,6 +331,72 @@ go test -v ./...
 
 # Run a specific test
 go test -v -run TestResourceGroup
+```
+
+### Comprehensive Testing Strategies
+
+#### Testing Resource Creation with Assertions
+
+```go
+func TestResourceGroupModule(t *testing.T) {
+	// Set up Terratest
+	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+		TerraformDir:    "../terragrunt/dev/resource_group",
+		TerraformBinary: "terragrunt",
+	})
+	defer terraform.Destroy(t, terraformOptions)
+	
+	// Deploy and get outputs
+	terraform.InitAndApply(t, terraformOptions)
+	resourceGroupName := terraform.Output(t, terraformOptions, "resource_group_name")
+	
+	// Verify resource exists
+	exists := azure.ResourceGroupExists(t, resourceGroupName, "")
+	assert.True(t, exists, "Resource group should exist")
+	
+	// Verify tags
+	tags := azure.GetResourceGroupTags(t, resourceGroupName, "")
+	assert.Equal(t, "dev", tags["Environment"])
+	assert.Equal(t, "OpenTofu", tags["ManagedBy"])
+}
+```
+
+#### Testing Security Configurations
+
+```go
+func TestNetworkSecurityRules(t *testing.T) {
+	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+		TerraformDir:    "../terragrunt/dev/networking",
+		TerraformBinary: "terragrunt",
+	})
+	defer terraform.Destroy(t, terraformOptions)
+	
+	// Deploy
+	terraform.InitAndApply(t, terraformOptions)
+	
+	// Get outputs
+	nsgName := terraform.Output(t, terraformOptions, "nsg_name")
+	rgName := terraform.Output(t, terraformOptions, "resource_group_name")
+	
+	// Verify security rules
+	rules := azure.GetNetworkSecurityGroupRules(t, nsgName, rgName, "")
+	
+	// Check if HTTPS is allowed and SSH is restricted
+	httpsRuleExists := false
+	sshRuleRestricted := true
+	
+	for _, rule := range rules {
+		if rule.DestinationPortRange == "443" && rule.Access == "Allow" {
+			httpsRuleExists = true
+		}
+		if rule.DestinationPortRange == "22" && rule.SourceAddressPrefix == "*" {
+			sshRuleRestricted = false
+		}
+	}
+	
+	assert.True(t, httpsRuleExists, "HTTPS traffic should be allowed")
+	assert.True(t, sshRuleRestricted, "SSH should not be open to the world")
+}
 ```
 
 ## Established Patterns
@@ -397,12 +523,12 @@ resource "azurerm_network_security_group" "example" {
 Configure backend state storage:
 
 ```hcl
-terraform {
+tofu {
   backend "azurerm" {
     resource_group_name  = "tfstate"
     storage_account_name = "tfstate12345"
     container_name       = "tfstate"
-    key                  = "env.tfstate"
+    key                  = "env.tofu.tfstate"
   }
 }
 ```

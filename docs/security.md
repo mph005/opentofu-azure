@@ -202,3 +202,47 @@ Role-Based Access Control is implemented at all levels:
 3. **Secrets Management**:
    - No secrets in code repositories
    - References to Key Vault or environment variables only 
+
+## Terragrunt Security Practices
+
+1. **Configuration Security**:
+   - DRY configurations prevent security misconfigurations across environments
+   - Centralized security settings in root `terragrunt.hcl` files
+   - Environment-specific security controls enforced through inheritance
+
+2. **State Management**:
+   - State files securely stored in environment-isolated Azure Storage containers
+   - State locking prevents concurrent modifications
+   - State encryption with customer-managed keys where appropriate
+
+3. **Credential Management**:
+   - Azure CLI authentication with service principals using managed identities
+   - `include` blocks for security configuration to prevent duplication
+   - Restriction of variable scope to prevent leakage between environments
+
+4. **Secure Backend Configuration**:
+   - Network-level controls on state storage using private endpoints
+   - IP restrictions on backend access
+   - Logging and monitoring of all backend operations
+
+## Terratest Security Validation
+
+1. **Automated Security Testing**:
+   - Security assertions in all Terratest modules
+   - Validation of encryption settings, network ACLs, and access controls
+   - Detection of security misconfigurations before deployment
+
+2. **Security Compliance Testing**:
+   - Tests to validate compliance with security standards
+   - Verification of proper RBAC implementation
+   - Validation of network security group rules
+
+3. **Security Regression Prevention**:
+   - Continuous testing in CI/CD pipeline
+   - Security baseline validation
+   - Automated detection of security policy violations
+
+4. **Testing Isolation**:
+   - Temporary test environments with strict boundaries
+   - Resource isolation for security testing
+   - Complete cleanup of test resources after validation 

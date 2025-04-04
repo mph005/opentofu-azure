@@ -18,7 +18,7 @@ generate "provider" {
   path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
-terraform {
+tofu {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -42,14 +42,14 @@ provider "azurerm" {
 EOF
 }
 
-# Configure Terragrunt to use Azure storage for the Terraform state
+# Configure Terragrunt to use Azure storage for the OpenTofu state
 remote_state {
   backend = "azurerm"
   config = {
     resource_group_name  = "tfstate"
     storage_account_name = "tfstate${get_env("TF_VAR_state_sa_suffix", "12345")}"
     container_name       = "tfstate"
-    key                  = "${local.env}/${path_relative_to_include()}/terraform.tfstate"
+    key                  = "${local.env}/${path_relative_to_include()}/tofu.tfstate"
   }
   generate = {
     path      = "backend.tf"

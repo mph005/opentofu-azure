@@ -1,6 +1,6 @@
 # Azure Infrastructure with OpenTofu & Terragrunt
 
-This repository contains OpenTofu (Terraform) code managed with Terragrunt for Azure infrastructure. The code is organized into reusable modules and environment-specific configurations.
+This repository contains OpenTofu code managed with Terragrunt for Azure infrastructure. The code is organized into reusable modules and environment-specific configurations.
 
 ## Project Structure
 
@@ -24,15 +24,24 @@ This repository contains OpenTofu (Terraform) code managed with Terragrunt for A
 │   ├── networking_test.go
 │   ├── storage_test.go
 │   └── README.md
+├── docs/                # Project documentation
+│   ├── technical.md     # Technical specifications and patterns
+│   ├── architecture.md  # Architecture overview and design
+│   ├── security.md      # Security practices and guidelines
+│   ├── status.md        # Project status and progress tracking
+│   ├── tasks.md         # Development tasks and roadmap
+│   └── diagrams/        # Architecture diagrams
 ├── main.tf              # Root module configuration
 ├── variables.tf         # Root variables
 └── outputs.tf           # Root outputs
 ```
 
+> **Note on HCL Syntax**: While we use OpenTofu, we still use `terraform` as the configuration block name in `.tf` files for compatibility with existing tools, linters, and syntax highlighters. OpenTofu is fully compatible with this naming convention. In Terragrunt files, we've updated the generated content to use `tofu` blocks.
+
 ## Prerequisites
 
-1. [OpenTofu](https://opentofu.org/docs/intro/install/) or Terraform CLI
-2. [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)
+1. [OpenTofu](https://opentofu.org/docs/intro/install/) (>= 1.0)
+2. [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/) (>= 0.45.0)
 3. [Go](https://golang.org/doc/install) (for running Terratest)
 4. Azure CLI
 5. Azure Storage Account for state management (recommended)
@@ -41,7 +50,7 @@ This repository contains OpenTofu (Terraform) code managed with Terragrunt for A
 
 ### Authentication
 
-Before running OpenTofu/Terragrunt commands, authenticate with Azure:
+Before running OpenTofu and Terragrunt commands, authenticate with Azure:
 
 ```bash
 az login
@@ -75,7 +84,7 @@ az storage container create --name $CONTAINER_NAME --account-name $STORAGE_ACCOU
 
 ### Using Terragrunt
 
-Terragrunt provides a thin wrapper for OpenTofu/Terraform that enables DRY configurations, dependencies between modules, and easier management of environment-specific settings.
+Terragrunt provides a thin wrapper for OpenTofu that enables DRY configurations, dependencies between modules, and easier management of environment-specific settings.
 
 #### Initialize and Apply
 
@@ -212,6 +221,27 @@ The tests verify that resources are created correctly with the expected properti
 - `networking_test.go`: Tests for the networking module
 - `storage_test.go`: Tests for the storage module
 
+### Advanced Testing Features
+
+The test suite includes comprehensive validation for:
+
+- Resource existence and properties
+- Security configurations
+- Network rules and access controls
+- Tag compliance
+
+For more details on the testing approach, see `docs/technical.md`.
+
+## Terragrunt Benefits
+
+Terragrunt enhances the OpenTofu workflow by providing:
+
+1. **DRY configurations**: Reuse common settings across environments
+2. **Dependencies**: Define explicit dependencies between modules
+3. **Remote state management**: Simplified backend configuration
+4. **Multi-environment support**: Easily work with dev, staging, and production
+5. **Terragrunt hooks**: Run custom scripts before/after OpenTofu commands
+
 ## Best Practices
 
 1. **State Management**: Always use remote state storage
@@ -228,3 +258,14 @@ The tests verify that resources are created correctly with the expected properti
 3. **Encryption**: Enable encryption for storage accounts
 4. **Key Rotation**: Regularly rotate access keys and credentials
 5. **Monitoring**: Enable diagnostic settings for all resources
+
+## Documentation
+
+Comprehensive documentation is available in the `docs/` directory:
+
+- `technical.md`: Technical specifications, coding standards, and established patterns
+- `architecture.md`: Architecture overview, component relationships, and diagrams
+- `security.md`: Security practices, guidelines, and compliance controls
+- `status.md`: Current project status and progress tracking
+- `tasks.md`: Development tasks, requirements, and acceptance criteria
+- `diagrams/`: Visual representations of the architecture and workflows

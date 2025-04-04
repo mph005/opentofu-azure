@@ -13,14 +13,16 @@ This document outlines the current development tasks, requirements, and acceptan
 - Integration with existing VNet for private endpoints
 - Soft-delete and purge protection enabled by default
 - Secret rotation capability
+- Terragrunt configuration for all environments
 
 **Acceptance Criteria:**
 - Module creates Key Vault with configurable settings
 - Access can be restricted to specified VNet/subnet
 - Secrets can be created and retrieved
 - Integration with existing modules demonstrated
+- Terratest tests validate key functionality
 
-**Deadline:** YYYY-MM-DD
+**Deadline:** 2025-04-30
 
 ---
 
@@ -33,6 +35,7 @@ This document outlines the current development tasks, requirements, and acceptan
 - Application Insights for application monitoring
 - Azure Monitor for resource metrics
 - Alert rules for critical conditions
+- Integration with existing Terragrunt configuration
 
 **Acceptance Criteria:**
 - All resources send logs to central Log Analytics workspace
@@ -42,8 +45,9 @@ This document outlines the current development tasks, requirements, and acceptan
   - Failed authentication attempts
   - Application errors
 - Alerts can be sent via email and webhook
+- Terratest tests verify logging configuration
 
-**Deadline:** YYYY-MM-DD
+**Deadline:** 2025-05-15
 
 ---
 
@@ -58,6 +62,7 @@ This document outlines the current development tasks, requirements, and acceptan
 - Set up budgets and alerts
 - Configure auto-shutdown for non-production resources
 - Implement right-sizing recommendations
+- Use Terragrunt to enforce tagging standards
 
 **Acceptance Criteria:**
 - All resources properly tagged for cost reporting
@@ -65,7 +70,7 @@ This document outlines the current development tasks, requirements, and acceptan
 - Dev/Test VMs automatically shut down during non-business hours
 - Documentation for cost optimization best practices
 
-**Deadline:** YYYY-MM-DD
+**Deadline:** 2025-05-30
 
 ---
 
@@ -78,14 +83,16 @@ This document outlines the current development tasks, requirements, and acceptan
 - Environment promotion (dev -> staging -> prod)
 - Testing before deployment
 - Approval gates for production changes
+- Run Terratest automatically on each PR
 
 **Acceptance Criteria:**
 - Pipeline automatically triggered on pull requests
 - Plan output displayed for review before apply
 - Changes automatically applied after approval
 - Failed deployments trigger notification and rollback
+- Terratest tests run as part of the pipeline
 
-**Deadline:** YYYY-MM-DD
+**Deadline:** 2025-06-15
 
 ---
 
@@ -100,38 +107,80 @@ This document outlines the current development tasks, requirements, and acceptan
 - Create diagrams for architecture overview
 - Document security practices
 - Create runbook for common operations
+- Document Terragrunt workflow
 
 **Acceptance Criteria:**
 - README contains accurate setup instructions
 - Architecture diagrams created and stored in docs/diagrams
 - Security practices documented in docs/security.md
 - Runbook created with step-by-step procedures
+- Terragrunt deployment guide created
 
-**Deadline:** YYYY-MM-DD
+**Deadline:** 2025-06-30
 
 ---
 
-### Module Testing Framework
+### Module Testing Framework Enhancement
 
-**Description:** Implement automated testing for OpenTofu modules.
+**Description:** Extend the automated testing for OpenTofu modules.
 
 **Requirements:**
-- Use Terratest or similar framework
-- Test both success and failure cases
-- Integration with CI pipeline
-- Code coverage reporting
+- Additional Terratest test cases
+- Integration tests across multiple modules
+- Performance testing
+- Security compliance testing
 
 **Acceptance Criteria:**
-- All modules have automated tests
+- All modules have comprehensive automated tests
 - Tests run automatically in CI pipeline
 - Failed tests prevent merging
 - Documentation for adding new tests
+- Test coverage reports generated
 
-**Deadline:** YYYY-MM-DD
+**Deadline:** 2025-07-15
 
 ---
 
 ## Completed Tasks
+
+### Terragrunt Integration
+
+**Description:** Set up Terragrunt for managing environments and module dependencies.
+
+**Requirements:**
+- DRY configuration across environments
+- Dependency management between modules
+- Remote state configuration
+- Environment-specific variables
+
+**Acceptance Criteria:**
+- Terragrunt configuration for all environments
+- Modules can be applied individually or as a whole
+- State files are properly separated per environment
+- Documentation for using Terragrunt
+
+**Completed:** 2025-04-04
+
+---
+
+### Terratest Framework Implementation
+
+**Description:** Set up automated testing framework using Terratest.
+
+**Requirements:**
+- Tests for each module
+- Clean up resources after testing
+- Integration with CI/CD pipeline
+
+**Acceptance Criteria:**
+- Basic tests implemented for resource group, networking, and storage modules
+- Tests use unique resource names to avoid conflicts
+- Tests clean up resources after completion
+- Documentation for running and extending tests
+
+**Completed:** 2025-04-04
+
+---
 
 ### Virtual Network Module
 
@@ -149,7 +198,7 @@ This document outlines the current development tasks, requirements, and acceptan
 - Service endpoints can be enabled
 - VNet peering can be configured
 
-**Completed:** YYYY-MM-DD
+**Completed:** 2025-04-03
 
 ---
 
@@ -169,4 +218,4 @@ This document outlines the current development tasks, requirements, and acceptan
 - Access can be restricted to specified VNet/subnet
 - Data is encrypted at rest and in transit
 
-**Completed:** YYYY-MM-DD 
+**Completed:** 2025-04-03 

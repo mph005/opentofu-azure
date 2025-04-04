@@ -9,7 +9,7 @@ terraform {
 
   backend "azurerm" {
     # Configure during initialization
-    # tofu init -backend-config="resource_group_name=tfstate" -backend-config="storage_account_name=tfstate12345" -backend-config="container_name=tfstate" -backend-config="key=prod.tfstate"
+    # tofu init -backend-config="resource_group_name=tfstate" -backend-config="storage_account_name=tfstate12345" -backend-config="container_name=tfstate" -backend-config="key=prod.tofu.tfstate"
   }
 }
 

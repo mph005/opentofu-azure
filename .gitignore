@@ -1,4 +1,4 @@
-# OpenTofu / Terraform
+# OpenTofu
 **/.terraform/*
 *.tfstate
 *.tfstate.*
@@ -7,11 +7,13 @@
 *.tfbackup
 .terragrunt-cache
 .terraform.lock.hcl
+.tofu.lock.hcl
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
 terraform.rc
+tofu.rc
 
 # Terragrunt
 .terragrunt-cache/
@@ -33,6 +35,7 @@ go.work.sum
 .envrc
 *.env.*
 credentials.json
+*secrets*
 
 # Azure 
 .azure/
@@ -52,7 +55,6 @@ azure.yaml
 *.iml
 *.iws
 *.ipr
-*.iws
 out/
 
 # macOS
@@ -75,4 +77,21 @@ $RECYCLE.BIN/
 # Logs
 logs
 *.log
-*.debug 
+*.debug
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude private keypairs
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Credentials
+.kube/
+kubeconfig
+*credential*
+*account.json
+service-account.json 

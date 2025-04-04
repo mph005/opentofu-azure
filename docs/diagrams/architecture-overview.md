@@ -69,6 +69,67 @@ graph TD
     AM --> AI
 ```
 
+## Terragrunt Structure
+
+```mermaid
+graph TD
+    subgraph "Root Config"
+        ROOT[terragrunt.hcl]
+    end
+    
+    subgraph "Environments"
+        DEV[Development]
+        STG[Staging]
+        PROD[Production]
+    end
+    
+    subgraph "Dev Modules"
+        DEV_RG[Resource Group]
+        DEV_NET[Networking]
+        DEV_ST[Storage]
+    end
+    
+    subgraph "Staging Modules"
+        STG_RG[Resource Group]
+        STG_NET[Networking]
+        STG_ST[Storage]
+    end
+    
+    subgraph "Prod Modules"
+        PROD_RG[Resource Group]
+        PROD_NET[Networking]
+        PROD_ST[Storage]
+    end
+    
+    ROOT --> DEV
+    ROOT --> STG
+    ROOT --> PROD
+    
+    DEV --> DEV_RG
+    DEV --> DEV_NET
+    DEV --> DEV_ST
+    
+    STG --> STG_RG
+    STG --> STG_NET
+    STG --> STG_ST
+    
+    PROD --> PROD_RG
+    PROD --> PROD_NET
+    PROD --> PROD_ST
+    
+    DEV_NET --> |dependency| DEV_RG
+    DEV_ST --> |dependency| DEV_RG
+    DEV_ST --> |dependency| DEV_NET
+    
+    STG_NET --> |dependency| STG_RG
+    STG_ST --> |dependency| STG_RG
+    STG_ST --> |dependency| STG_NET
+    
+    PROD_NET --> |dependency| PROD_RG
+    PROD_ST --> |dependency| PROD_RG
+    PROD_ST --> |dependency| PROD_NET
+```
+
 ## State Management
 
 ```mermaid
@@ -77,11 +138,41 @@ graph LR
     CICD[CI/CD Pipeline] --> |tofu apply| PLAN
     
     PLAN --> LOCK[State Lock]
-    LOCK --> STATE[Azure Storage<br/>Terraform State]
+    LOCK --> STATE[Azure Storage<br/>OpenTofu State]
     STATE --> |Read Current State| PLAN
     
     STATE --> AZURE[Azure Resources]
     PLAN --> |Create/Update/Delete| AZURE
+```
+
+## Terragrunt & Terratest Workflow
+
+```mermaid
+graph TD
+    subgraph "Development Process"
+        CODE[Code Changes] --> PR[Pull Request]
+        PR --> CI[CI Pipeline]
+        CI --> LINT[Linting & Validation]
+        LINT --> TEST[Terratest]
+        TEST --> REVIEW[Plan Review]
+        REVIEW --> APPLY[Apply Changes]
+    end
+    
+    subgraph "Testing"
+        TEST --> |Create| TEST_RG[Temporary<br/>Resource Group]
+        TEST --> |Deploy| TEST_INFRA[Test Infrastructure]
+        TEST --> |Validate| TEST_ASSERT[Assertions]
+        TEST --> |Cleanup| TEST_DESTROY[Destroy Resources]
+    end
+    
+    subgraph "Deployment"
+        APPLY --> |dev| DEV_ENV[Dev Environment]
+        APPLY --> |staging| STG_ENV[Staging Environment]
+        APPLY --> |production| PROD_ENV[Production Environment]
+    end
+    
+    DEV_ENV --> |Promote| STG_ENV
+    STG_ENV --> |Promote| PROD_ENV
 ```
 
 ## Multi-Environment Setup
@@ -139,4 +230,4 @@ graph TB
     APP --> VM[VM Scale Set]
     DAT --> DB[Azure SQL]
     DAT --> ST[Storage Account]
-``` 
+```
