@@ -1,11 +1,11 @@
-# Azure Infrastructure with OpenTofu
+# Azure Infrastructure with OpenTofu & Terragrunt
 
-This repository contains OpenTofu (Terraform) code for managing Azure infrastructure. The code is organized into reusable modules and environment-specific configurations.
+This repository contains OpenTofu (Terraform) code managed with Terragrunt for Azure infrastructure. The code is organized into reusable modules and environment-specific configurations.
 
 ## Project Structure
 
 ```text
-├── environments/        # Environment specific configurations
+├── environments/        # Legacy environment-specific configurations (direct module use)
 │   ├── dev/             # Development environment
 │   ├── staging/         # Staging environment
 │   └── prod/            # Production environment
@@ -14,32 +14,44 @@ This repository contains OpenTofu (Terraform) code for managing Azure infrastruc
 │   ├── networking/      # VNet, subnet, NSG resources
 │   ├── resource_group/  # Resource group module
 │   └── storage/         # Storage account and container resources
+├── terragrunt/          # Terragrunt configurations
+│   ├── terragrunt.hcl   # Root configuration
+│   ├── dev/             # Development environment
+│   ├── staging/         # Staging environment
+│   └── prod/            # Production environment
+├── test/                # Terratest tests
+│   ├── resource_group_test.go
+│   ├── networking_test.go
+│   ├── storage_test.go
+│   └── README.md
 ├── main.tf              # Root module configuration
 ├── variables.tf         # Root variables
 └── outputs.tf           # Root outputs
-
+```
 
 ## Prerequisites
 
 1. [OpenTofu](https://opentofu.org/docs/intro/install/) or Terraform CLI
-2. Azure CLI
-3. Azure Storage Account for state management (recommended)
+2. [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)
+3. [Go](https://golang.org/doc/install) (for running Terratest)
+4. Azure CLI
+5. Azure Storage Account for state management (recommended)
 
 ## Getting Started
 
 ### Authentication
 
-Before running OpenTofu commands, authenticate with Azure:
+Before running OpenTofu/Terragrunt commands, authenticate with Azure:
 
 ```bash
 az login
-
+```
 
 Alternatively, use a service principal:
 
 ```bash
 az ad sp create-for-rbac --name "OpenTofuSP" --role Contributor --scopes /subscriptions/<subscription-id>
-
+```
 
 ### Remote State Setup
 
@@ -59,9 +71,43 @@ az storage account create --resource-group $RESOURCE_GROUP_NAME --name $STORAGE_
 
 # Create blob container
 az storage container create --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME
+```
 
+### Using Terragrunt
 
-### Module Usage
+Terragrunt provides a thin wrapper for OpenTofu/Terraform that enables DRY configurations, dependencies between modules, and easier management of environment-specific settings.
+
+#### Initialize and Apply
+
+```bash
+# Go to the desired environment and module
+cd terragrunt/dev/resource_group
+
+# Initialize and apply
+terragrunt init
+terragrunt plan
+terragrunt apply
+```
+
+#### Working with All Modules
+
+Terragrunt allows you to run commands on all modules in an environment:
+
+```bash
+# Go to the environment directory
+cd terragrunt/dev
+
+# Initialize all modules
+terragrunt run-all init
+
+# Plan all modules
+terragrunt run-all plan
+
+# Apply all modules
+terragrunt run-all apply
+```
+
+### Module Usage (Direct, without Terragrunt)
 
 #### Resource Group
 
@@ -73,7 +119,7 @@ module "resource_group" {
   location            = "East US"
   tags                = { Environment = "Dev" }
 }
-
+```
 
 #### Networking
 
@@ -97,7 +143,7 @@ module "networking" {
   
   tags = { Environment = "Dev" }
 }
-
+```
 
 #### Storage
 
@@ -117,7 +163,7 @@ module "storage" {
   
   tags = { Environment = "Dev" }
 }
-
+```
 
 #### Compute
 
@@ -136,32 +182,35 @@ module "vm" {
   
   tags = { Environment = "Dev" }
 }
+```
 
+## Testing with Terratest
 
-## Deployment
+This project uses [Terratest](https://terratest.gruntwork.io/) to test the infrastructure code.
 
-### Initialize OpenTofu
-
-```bash
-cd environments/dev
-tofu init -backend-config="resource_group_name=tfstate" \
-          -backend-config="storage_account_name=tfstate12345" \
-          -backend-config="container_name=tfstate" \
-          -backend-config="key=dev.tfstate"
-
-
-### Deploy Resources
+### Running Tests
 
 ```bash
-tofu plan -out=tfplan
-tofu apply tfplan
+# Navigate to the test directory
+cd test
 
+# Download dependencies
+go mod download
 
-### Destroy Resources
+# Run all tests
+go test -v ./...
 
-```bash
-tofu destroy
+# Run specific test
+go test -v -run TestResourceGroup
+```
 
+### Test Structure
+
+The tests verify that resources are created correctly with the expected properties:
+
+- `resource_group_test.go`: Tests for the resource group module
+- `networking_test.go`: Tests for the networking module
+- `storage_test.go`: Tests for the storage module
 
 ## Best Practices
 
