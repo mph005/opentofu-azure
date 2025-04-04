@@ -1,0 +1,78 @@
+# OpenTofu / Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfbackup
+.terragrunt-cache
+.terraform.lock.hcl
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+terraform.rc
+
+# Terragrunt
+.terragrunt-cache/
+terragrunt-debug.tfvars
+.terragrunt-module-manifest
+
+# Go test binaries and artifacts
+*.test
+*.test.exe
+/test/vendor/
+/test/bin/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Local environment files
+.env
+.envrc
+*.env.*
+credentials.json
+
+# Azure 
+.azure/
+azure.yaml
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+.history/
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+*.iws
+out/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# Logs
+logs
+*.log
+*.debug 
