@@ -5,51 +5,37 @@ This document outlines the current development tasks, requirements, and acceptan
 ## High Priority Tasks
 
 ### Implement Key Vault Module
-
-**Description:** Create a reusable Azure Key Vault module to securely store and manage secrets.
-
-**Requirements:**
-- Support for access policies and RBAC authorization
-- Integration with existing VNet for private endpoints
-- Soft-delete and purge protection enabled by default
-- Secret rotation capability
-- Terragrunt configuration for all environments
-
-**Acceptance Criteria:**
-- Module creates Key Vault with configurable settings
-- Access can be restricted to specified VNet/subnet
-- Secrets can be created and retrieved
-- Integration with existing modules demonstrated
-- Terratest tests validate key functionality
-
-**Deadline:** 2025-04-30
-
----
+- **Status**: Completed (2025-04-05)
+- **Description**: Create a reusable Azure Key Vault module for securely storing and managing secrets.
+- **Requirements**:
+  - Support for access policies and RBAC authorization
+  - Integration with virtual networks for enhanced security
+  - Secret rotation capabilities
+  - Private endpoint support
+  - Soft delete and purge protection
+- **Acceptance Criteria**:
+  - Module can be deployed to Azure successfully
+  - Secrets can be stored and retrieved securely
+  - Network access control is properly implemented
+  - Terragrunt configuration is available for all environments
+  - Terratest validates module functionality
+- **Deadline**: 2025-04-30
 
 ### Implement Monitoring and Alerts
-
-**Description:** Set up comprehensive monitoring and alerting for all Azure resources.
-
-**Requirements:**
-- Log Analytics workspace for centralized logging
-- Application Insights for application monitoring
-- Azure Monitor for resource metrics
-- Alert rules for critical conditions
-- Integration with existing Terragrunt configuration
-
-**Acceptance Criteria:**
-- All resources send logs to central Log Analytics workspace
-- Alert rules established for:
-  - High CPU/Memory usage
-  - Storage capacity thresholds
-  - Failed authentication attempts
-  - Application errors
-- Alerts can be sent via email and webhook
-- Terratest tests verify logging configuration
-
-**Deadline:** 2025-05-15
-
----
+- **Status**: In Progress
+- **Description**: Set up monitoring and alerting for Azure resources.
+- **Requirements**:
+  - Create a Log Analytics workspace
+  - Configure diagnostic settings for all resources
+  - Set up alert rules for critical conditions
+  - Implement action groups for notifications
+- **Acceptance Criteria**:
+  - All resources send logs to the Log Analytics workspace
+  - Alert rules are triggered when conditions are met
+  - Notifications are sent to the appropriate teams
+  - Integration with existing Terragrunt configuration
+  - Terratest verifies monitoring setup
+- **Deadline**: 2025-05-15
 
 ## Medium Priority Tasks
 
